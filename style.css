@@ -5,3 +5,11 @@
 .block__url {
   width: 300px;
 }
+
+.do-not-show {
+  display: none;
+}
+
+.wrap {
+  position: relative;
+}
