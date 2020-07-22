@@ -1,5 +1,6 @@
 const GITHUB_URL_TEMPLATE = 'https://api.github.com/users/';
 const QUERY_PARAM_NAME = 'username';
+const preloader = document.getElementById('wrap__preloader');
 
 let button = document.getElementById('block__button');
 let enteredUrl = document.getElementById('block__url');
@@ -10,15 +11,34 @@ button.onclick = () => {
 };
 
 function query(endOfTemplate) {
-	if(!endOfTemplate)
-  	handleError(endOfTemplate);
+	if(!endOfTemplate) {
+    handleError(endOfTemplate);
+    return;
+  }
+  
+  preloader.classList.remove('do-not-show');
 
-fetch(GITHUB_URL_TEMPLATE + endOfTemplate)
-  	.then(response => response.ok ? Promise.resolve(response) : Promise.reject(response))
-  	.then(response => response.json())
-    .then(json => parseJson(json))
-    .then(obj => createUserCard(obj))
-    .catch(response => handleError(response));  
+  Promise.all([
+    new Promise((resolve) => {
+      setTimeout(() => {
+        let date = new Date();
+        resolve(date);
+      }, 4000);
+    }),
+    fetch(GITHUB_URL_TEMPLATE + endOfTemplate)
+    	.then(response => response.ok ? Promise.resolve(response) : Promise.reject(response))
+    	.then(response => response.json())
+      .then(json => parseJson(json))    
+  ]).then(([date, user]) => {
+    fillDate(date);
+    createUserCard(user);
+  }).then(() => preloader.classList.add('do-not-show'))
+  .catch(response => handleError(response));
+}
+
+function fillDate(date){
+  let dateInfo = document.getElementById('date');
+  dateInfo.innerHTML = `${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}; ${date.getDate()}.${date.getMonth()}.${date.getFullYear()}`;
 }
 
 function createUserCard(obj){
